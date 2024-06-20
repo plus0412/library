@@ -1,0 +1,779 @@
+#include <stdio.h>
+//#include<Bits/stdc++.h> 
+#include<windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <windows.h>
+#include <conio.h>
+//using namespace std;
+typedef struct Book {// 定义书籍结构体
+    char title[50];
+    char author[50];
+    char isbn[20];
+    int borrowed; // 0表示未借出，1表示已借出
+    char borrowerID[20];
+    int inventory; 
+    int bookType; // 书籍种类标识符
+    int reservations[3]; // 最多三个预约
+} Book;
+// 定义人员结构体
+typedef struct Person {
+    char name[50];
+    char id[20];
+    char password[20];
+    int borrowedCount; // 借阅的书籍数量
+	int reputation; // 信誉分
+    int borrowTime[3]; // 借书时间，数组大小为3
+    int returnTime[3]; // 应还书时间，数组大小为3   
+    Book reservedBooks[1]; // 最多一个预约的书籍
+	Book borrowedBooks[3]; // 最多借三本书
+} Person;
+// 函数声明
+void addBook(Book books[], int *count, int maxBooks);
+void displayBooks(const Book books[], int count);
+void searchBook(const Book books[], int count);
+void borrowBook(Book books[], int count, Person people[], int personCount, int currentUser);
+void returnBook(Book books[], int count, Person people[], int personCount, int currentUser);
+void deleteBook(Book books[], int *count);
+void loadBooks(Book books[], int *count);
+void saveBooks(const Book books[], int count);
+void addPerson(Person people[], int *personCount);
+void displayPeople(const Person people[], int personCount);
+void searchPerson(const Person people[], int personCount);
+void deletePerson(Person people[], int *personCount);
+int loginPerson(Person people[], int personCount);
+void loadPeople(Person people[], int *count);
+void savePeople(Person people[], int count);
+void displayBookMenu(const Person people[], int personCount);
+void searchBookByType(const Book books[], int count);
+void checkReservations(Person people[], int personCount, int currentUser, const Book books[], int count);
+int main() {
+	system("color 5E");
+	int m,n;
+	n=000;
+    Book books[100]; // 假设图书馆最多有100本书
+    int count = 0; // 当前书籍数量
+    int maxBooks = 1;
+    int found,a;
+    Person people[100]; // 假设图书馆最多有100个人
+    int personCount = 0;
+    int choice;
+    int currentUser; 
+    char searchID[20];
+	int flag=1;
+    // 加载书籍和人员信息
+    loadBooks(books, &count);
+    loadPeople(people, &personCount);
+	if(flag==1){	
+    while (1) {
+        printf("按下空格键显示菜单...");
+        while (getch() != ' ') {
+            // 等待用户按下空格键
+        }
+        system("cls"); // 清屏
+        printf("图书馆管理系统\n");
+        printf("1. 人员登录\n");
+        printf("2. 人员注册\n");
+        printf("3. 人员删除\n");
+        printf("4. 管理员系统\n");
+        printf("5. 退出\n");
+        printf("请输入你的选择：");
+        scanf("%d", &choice);
+        getchar(); // 清除输入缓冲区中的换行符
+        switch (choice) {
+            case 1:
+            	system("cls"); 
+                printf("人员登录/录入\n");
+                printf("1. 登录\n");
+                switch (choice) { 
+                    case 1:
+                         currentUser = loginPerson(people, personCount);
+                      if (currentUser!=-1) {
+                      	checkReservations(people, personCount, currentUser, books, count);
+                        Sleep(1000);
+                        flag=0;
+                        if(flag==0){
+						while(1){
+							if(flag==1){
+								break;
+							}
+							printf("按下空格键显示菜单...");// 等待用户按下空格键
+							while (getch() != ' ') {
+            				
+        				}
+                        system("cls");
+                        printf("用户功能\n");
+    					printf("1. 显示所有书籍\n");
+    					printf("2. 搜索书籍\n");
+    					printf("3. 返回主菜单\n");
+    					printf("请输入你的选择：");
+    					scanf("%d", &choice);
+    					getchar(); // 清除输入缓冲区中的换行符
+    					switch (choice) {
+        // 图书功能逻辑
+        				case 1:
+            				displayBooks(books, count);
+            				break;
+        				case 2:
+        					flag=3;
+        					if(flag==3){
+						while(1){
+							if(flag==0){
+								break;
+							}
+							printf("按下空格键显示菜单..."); // 等待用户按下空格键
+							while (getch() != ' ') {
+								          					
+        					}
+        					system("cls");
+        					printf("查询功能\n");
+    						printf("1. 关键词查找\n");
+    						printf("2. 分类查找\n");
+    						printf("3. 返回\n");
+    						printf("请输入你的选择：");
+    						scanf("%d", &choice);
+    						getchar(); // 清除输入缓冲区中的换行符
+    						switch (choice) {
+        // 图书功能逻辑
+        					case 1:
+            					searchBook(books, count);
+            					break;
+        					case 2:
+            					searchBookByType(books, count);
+            					break;
+            				case 3:
+            					flag=0;
+            					break;
+       						default:
+            					printf("无效的选择，请重新输入。\n");
+    						}
+                    	}           			
+            			break;           				
+            			case 3:
+            				flag=1;
+            				break;
+       					default:
+            			printf("无效的选择，请重新输入。\n");
+    					}
+                        }
+                        
+                    }
+					break;
+                    case 2:
+                        // 人员录入逻辑
+                        addPerson(people, &personCount);
+                        break;
+                    default:
+                        printf("无效的选择，请重新输入。\n");
+                    }
+                }
+                }
+                break;
+            case 2:
+            	addPerson(people, &personCount);
+                break;
+            case 3:
+                deletePerson(people, &personCount);
+                break; 
+            case 4:
+            	printf("输入管理员密码:");
+            	scanf("%d",&m);
+				if(m==n){
+					flag=2;
+					printf("登陆成功");
+				}else{
+					printf("密码错误，无法登录\n"); 
+				}
+            	
+				 if(flag==2){
+						while(1){
+							if(flag==1){
+								break;
+							}
+							printf("按下空格键显示菜单..."); // 等待用户按下空格键
+							while (getch() != ' ') {
+								
+                       
+           					
+        				}
+        				system("cls");
+        				printf("管理员功能\n");
+    					printf("1. 人员显示\n");
+    					printf("2. 人员查找\n");
+    					printf("3. 添加书籍\n");
+    					printf("4. 删除书籍\n");
+    					printf("5. 借书\n");
+    					printf("6. 还书\n");
+    					printf("7. 返回\n");
+    					printf("请输入你的选择：");
+    					scanf("%d", &choice);
+    					getchar(); // 清除输入缓冲区中的换行符
+    					switch (choice) {
+        // 图书功能逻辑
+        				case 1:
+            				displayPeople(people, personCount);
+            				break;
+        				case 2:
+            				searchPerson(people, personCount);
+            				break;
+        				case 3:
+            				addBook(books, &count, maxBooks);
+            				break;
+        				case 4:
+            				deleteBook(books, &count);
+            				break;
+            			case 5:
+            				borrowBook(books, count, people, personCount, currentUser);
+            				break;
+        				case 6:
+            				returnBook(books, count, people, personCount, currentUser);
+            				break;
+            			case 7:
+            				flag=1;
+            				break;
+       					default:
+            				printf("无效的选择，请重新输入。\n");
+    					}
+                    }
+            			
+            	break;
+            case 5:
+            	printf("退出系统。\n");
+                exit(0);
+            default:
+                printf("无效的选择，请重新输入。\n");
+        }
+    }
+}
+}
+    return 0;
+}
+void checkReservations(Person people[], int personCount, int currentUser, const Book books[], int count) {
+    bool canBorrow = false;
+    for (int i = 0; i < 1; i++) { // 假设reservedBooks最多只能预约三本书
+        if (people[currentUser].reservedBooks[i].isbn != NULL) {
+            for (int j = 0; j < count; j++) {
+                if (strcmp(people[currentUser].reservedBooks[i].isbn, books[j].isbn) == 0) {
+                    if (books[j].inventory > 0) {
+                        printf("您预约的书籍《%s》现在可以借阅了。\n", books[j].title);
+                        canBorrow = true;
+                    }
+                }
+            }
+        }
+    }
+    if (!canBorrow) {
+        printf("您没有预约任何书籍。\n");
+    }
+}
+int loginPerson(Person people[], int personCount) {
+    if (personCount == 0) {
+        printf("无人员信息，不能登录。\n");
+        return -1; // 返回-1表示登录失败
+    }
+    char searchID[20];
+    char inputPassword[20];
+    printf("请输入您的ID：");
+    fgets(searchID, sizeof(searchID), stdin);
+    searchID[strcspn(searchID, "\n")] = 0; // 去除换行符
+    printf("请输入密码：");
+    fgets(inputPassword, sizeof(inputPassword), stdin);
+    inputPassword[strcspn(inputPassword, "\n")] = 0; // 去除换行符
+    for (int i = 0; i < personCount; i++) {
+        if (strcmp(people[i].id, searchID) == 0 && strcmp(people[i].password, inputPassword) == 0) {
+            printf("欢迎%s登录系统。\n", people[i].name);
+            return i; // 返回登录用户的索引
+        }
+    }
+
+    printf("未找到对应的人员或密码错误。\n");
+    return -1; // 返回-1表示登录失败
+}
+void addBook(Book books[], int *count, int maxBooks) {
+    if (*count >= 100) {
+        printf("图书馆已满，无法添加新书。\n");
+        return;
+    }
+    Book newBook;
+    int booksAdded = 0;
+    while (booksAdded < maxBooks) {
+        printf("请输入书名：");
+        fgets(newBook.title, sizeof(newBook.title), stdin);
+        newBook.title[strcspn(newBook.title, "\n")] = 0; // 去除换行符
+
+        printf("请输入作者：");
+        fgets(newBook.author, sizeof(newBook.author), stdin);
+        newBook.author[strcspn(newBook.author, "\n")] = 0; // 去除换行符
+
+        printf("请输入ISBN：");
+        fgets(newBook.isbn, sizeof(newBook.isbn), stdin);
+        newBook.isbn[strcspn(newBook.isbn, "\n")] = 0; // 去除换行符
+		printf("请输入书籍种类（1-小说，2-科技，3-历史，4-教育，5-其他）：");
+    	scanf("%d", &newBook.bookType);
+        printf("请输入库存数量：");
+        scanf("%d", &newBook.inventory);
+
+        newBook.borrowed = 0; // 默认未借出
+        memset(newBook.reservations, 0, sizeof(newBook.reservations)); // 初始化预约信息为空
+        books[*count] = newBook;
+        (*count)++;
+        booksAdded++;
+    }
+    printf("书籍添加成功！\n");
+    saveBooks(books, *count);
+}
+
+// 显示所有书籍函数实现
+void displayBooks(const Book books[], int count) {
+	int i = 0;
+    if (count == 0) {
+        printf("图书馆目前没有书籍。\n");
+        return;
+    }
+	for (int i = 0; i < count; i++) {
+    printf("图书馆书籍列表：\n");
+        printf("书名：%s\n", books[i].title);
+        printf("作者：%s\n", books[i].author);
+        printf("ISBN：%s\n", books[i].isbn);
+		printf("状态：%s\n", books[i].borrowed ? "已借出" : "未借出");
+        printf("库存：%d\n", books[i].inventory); // 显示库存
+        
+        switch (books[i].bookType) {
+            case 1:
+                printf("书籍种类：小说\n");
+                break;
+            case 2:
+                printf("书籍种类：科技\n");
+                break;
+            case 3:
+                printf("书籍种类：历史\n");
+                break;
+            case 4:
+                printf("书籍种类：教育\n");
+                break;
+            default:
+                printf("书籍种类：其他\n");
+                break;
+        }
+        if (books[i].reservations[0] != 0) {
+            printf("预约状态：已预约\n");
+            printf("预约人ID：%d\n", books[i].reservations[0]);
+        } else {
+            printf("预约状态：未预约\n");
+        }
+
+        printf("--------------------\n");
+    }
+}
+
+// 搜索书籍函数实现
+void searchBook(const Book books[], int count) {
+    char searchContent[100]; // 假设搜索内容最多100个字符
+    printf("请输入要搜索的内容：");
+    fgets(searchContent, sizeof(searchContent), stdin);
+    searchContent[strcspn(searchContent, "\n")] = 0; // 去除换行符
+
+    int found = 0;
+    for (int i = 0; i < count; i++) {
+        // 检查书籍标题、作者和ISBN是否包含搜索内容
+        if (strstr(books[i].title, searchContent) != NULL ||//监测是否有相同内容 
+            strstr(books[i].author, searchContent) != NULL ) {
+            printf("找到书籍：%s\n", books[i].title);
+            printf("作者：%s\n", books[i].author);
+            printf("ISBN：%s\n", books[i].isbn);
+            printf("状态：%s\n", books[i].borrowed ? "已借出" : "未借出");
+            found = 1;
+        }
+    }
+    if (!found) {
+        printf("没有找到包含 '%s' 的书籍。\n", searchContent);
+    }
+}
+
+// 还书函数实现 
+void returnBook(Book books[], int bookCount, Person people[], int personCount, int currentUser) {
+    char searchISBN[20];
+  
+
+    char borrowerID[20];
+    printf("请输入还书人的ID：");
+    fgets(borrowerID, sizeof(borrowerID), stdin);
+    borrowerID[strcspn(borrowerID, "\n")] = 0; // 去除换行符
+
+    int borrowerIndex = -1;
+    for (int i = 0; i < personCount; i++) {
+        if (strcmp(borrowerID, people[i].id) == 0) {
+            borrowerIndex = i;
+            break;
+        }
+    }  
+	printf("请输入要还的书的ISBN：");
+    fgets(searchISBN, sizeof(searchISBN), stdin);
+    searchISBN[strcspn(searchISBN, "\n")] = 0; // 去除换行符
+
+    int found = -1;
+    for (int i = 0; i < bookCount; i++) {
+        if (strcmp(books[i].isbn, searchISBN) == 0) {
+            found = i;
+            break;
+        }
+    }
+    if (found == -1) {
+        printf("没有找到ISBN为%s的书籍。\n", searchISBN);
+        return;
+    }
+    if (borrowerIndex == -1) {
+        printf("未找到ID为%s的还书人。\n", borrowerID);
+        return;
+    }
+
+    if (strcmp(books[found].borrowerID, people[borrowerIndex].id) == 0) {
+        books[found].borrowed = 0;
+        strcpy(books[found].borrowerID, ""); // 清空借书人ID
+        books[found].inventory++; // 还书后库存加一
+        printf("还书成功！\n");
+        time_t now;
+        time(&now);
+        // 假设结束时间与还书时间都是整数类型，那么您可以直接使用整数变量
+        int endTime = now;
+        int returnTime = endTime; // 还书时间与结束时间相同
+        
+        if (endTime >* people[borrowerIndex].returnTime) { // 如果逾期
+            people[borrowerIndex].reputation -= 5; // 扣除5分
+            if (people[borrowerIndex].reputation < 10) { // 如果信誉分低于10分
+                people[borrowerIndex].reputation = 10; // 设置为10分
+            }
+        }
+        people[borrowerIndex].borrowedBooks[people[borrowerIndex].borrowedCount] = (Book){0}; // 清空借书信息
+        people[borrowerIndex].borrowedCount--; // 借书数量减少
+        saveBooks(books, bookCount); // 保存还书状态
+        savePeople(people, personCount); // 保存人员借书状态
+    } else {
+        printf("您不是借阅该书的用户，无法还书。\n");
+    }
+}
+// 借书函数实现 
+void borrowBook(Book books[], int bookCount, Person people[], int personCount, int currentUser) {
+    char borrowerID[20];
+    printf("请输入借书人的ID：");
+    fgets(borrowerID, sizeof(borrowerID), stdin);
+    borrowerID[strcspn(borrowerID, "\n")] = 0; // 去除换行符
+
+    int found = -1;
+    for (int i = 0; i < personCount; i++) {
+        if (strcmp(borrowerID, people[i].id) == 0) {
+            found = i;
+            break;
+        }
+    }
+    if (found == -1) {
+        printf("未找到ID为%s的借书人。\n", borrowerID);
+        return;
+    }
+    if (people[found].reputation <=10) { // 如果信誉分少于10分
+        printf("您的信誉分不足，无法借书。\n");
+        return;
+    }
+    if (people[found].borrowedCount >= 3) {
+        printf("当前借书人已借阅三本书，无法再借书。\n");
+        return;
+    }
+    char searchISBN[20];
+    printf("请输入要借的书的ISBN：");
+    fgets(searchISBN, sizeof(searchISBN), stdin);
+    searchISBN[strcspn(searchISBN, "\n")] = 0; // 去除换行符
+
+    int bookIndex = -1;
+    for (int i = 0; i < bookCount; i++) {
+        if (strcmp(books[i].isbn, searchISBN) == 0) {
+            bookIndex = i;
+            break;
+        }
+    }
+
+    if (bookIndex == -1) {
+        printf("没有找到ISBN为%s的书籍。\n", searchISBN);
+        return;
+    }
+   if (books[bookIndex].inventory == 0) {
+        int choice;
+        printf("该书库存为0，是否预约借书？（1/0）");
+        scanf("%d", &choice);
+        getchar(); // 清除输入缓冲区中的换行符
+        if (choice == 1) {
+            // 添加预约
+            for (int i = 0; i < 1; i++) { // 假设每个用户最多只能预约一本书
+                if (people[currentUser].reservedBooks[i].isbn[0] == '\0') {
+                    strcpy(people[currentUser].reservedBooks[i].isbn, searchISBN); 
+					printf("%s",people[currentUser].reservedBooks[i].isbn);
+					printf("预约成功，当有人还书后，您将优先借阅。\n");
+                    
+                    break;
+                }else{
+                	printf("已预约，不可继续预约\n");
+                	break; 
+				}
+            }
+           
+        } else {
+            printf("您没有预约此书，当有人还书后，您将无法优先借阅。\n");
+            return;
+        }
+    }
+    if (books[bookIndex].inventory > 0) { // 如果库存大于0
+        books[bookIndex].borrowed = 1; // 标记为已借出
+        strcpy(books[bookIndex].borrowerID, people[currentUser].id); // 记录借书人ID
+        books[bookIndex].inventory--; // 库存减一
+        people[found].borrowedBooks[people[found].borrowedCount] = books[bookIndex];
+        people[found].borrowedCount++; // 借书数量增加
+
+        // 为当前借阅的书籍设置独立的借书时间
+        time_t borrowTime = time(NULL);
+        int borrowTimeIndex = people[found].borrowedCount - 1; // 存储数组的索引
+        people[found].borrowTime[borrowTimeIndex] = borrowTime;
+
+        // 设置应还书时间为借书时间后一个月
+         time_t returnTime = borrowTime + 30 * 24 * 60 * 60;
+        people[found].returnTime[borrowTimeIndex] = returnTime;
+
+        saveBooks(books, bookCount); // 保存借书状态
+        savePeople(people, personCount); // 保存人员借书状态
+        printf("借书成功！您借阅的书籍是《%s》。\n", books[bookIndex].title);
+
+        // 清除预约信息
+        for (int i = 0; i < 3; i++) {
+            if (strcmp(people[currentUser].reservedBooks[i].isbn, books[bookIndex].isbn) == 0) {
+                strcpy(people[currentUser].reservedBooks[i].isbn, ""); // 清除预约信息
+                break;
+            }
+        }
+    } else {
+        printf("库存不足，无法借阅。\n");
+    }
+}
+//分类查询 
+void searchBookByType(const Book books[], int count) {
+    int type;
+    printf("请输入要查询的书籍种类（1-小说，2-科技，3-历史，4-教育，5-其他）：");
+    scanf("%d", &type);
+
+    int found = 0;
+    for (int i = 0; i < count; i++) {
+        if (books[i].bookType == type) {
+            printf("找到书籍：%s\n", books[i].title);
+            printf("作者：%s\n", books[i].author);
+            printf("ISBN：%s\n", books[i].isbn);
+            printf("状态：%s\n", books[i].borrowed ? "已借出" : "未借出");
+            found = 1;
+        }
+    }
+    if (!found) {
+        printf("没有找到该类别的书籍。\n");
+    }
+}
+// 删除书籍函数实现 
+void deleteBook(Book books[], int *count) { 
+	char searchISBN[20]; 
+	printf("请输入要删除的书的ISBN："); 
+	fgets(searchISBN, sizeof(searchISBN), stdin);
+ 	searchISBN[strcspn(searchISBN, "\n")] = 0; // 去除换行符
+
+for (int i = 0; i < *count; i++) {
+    if (strcmp(books[i].isbn, searchISBN) == 0) {
+        for (int j = i; j < *count - 1; j++) {
+            books[j] = books[j + 1];
+        }
+        (*count)--;
+        printf("书籍删除成功！\n");
+        saveBooks(books, *count); // 保存删除状态
+        return;
+    }
+}
+printf("没有找到ISBN为%s的书籍。\n", searchISBN);
+}
+
+// 加载书籍信息 
+void loadBooks(Book books[], int *count) { 
+FILE *file = fopen("books.dat", "rb");
+ if (file == NULL) { 
+ printf("无法打开书籍文件，将创建新文件。\n");
+  file = fopen("books.dat", "wb"); 
+  // 创建新文件 
+  if (file == NULL) { 
+  printf("创建文件失败。\n"); 
+  exit(1); 
+  } 
+  } else { 
+  Book book; 
+  while (fread(&book, sizeof(Book), 1, file)) { 
+  books[*count] = book;
+   (*count)++; 
+   } 
+   fclose(file); 
+   } 
+   }
+
+// 保存书籍信息 
+void saveBooks(const Book books[], int count) { 
+	FILE *file = fopen("books.dat", "wb");
+	if (file == NULL) { 
+ 		printf("无法打开书籍文件。\n"); 
+ 		return; 
+ 	} 
+ 	for (int i = 0; i < count; i++) { 
+ 		fwrite(&books[i], sizeof(Book), 1, file);
+  	} 
+  	fclose(file); 
+}
+// 添加人员函数实现
+void addPerson(Person people[], int *personCount) {
+    if (*personCount >= 100) {
+        printf("人员已满，无法添加新人员。\n");
+        return;
+    }
+    Person newPerson;
+    printf("请输入姓名：");
+    fgets(newPerson.name, sizeof(newPerson.name), stdin);
+    newPerson.name[strcspn(newPerson.name, "\n")] = 0; // 去除换行符
+
+    printf("请输入ID：");
+    fgets(newPerson.id, sizeof(newPerson.id), stdin);
+    newPerson.id[strcspn(newPerson.id, "\n")] = 0; // 去除换行符
+
+    // 检查ID是否已存在
+    for (int i = 0; i < *personCount; i++) {
+        if (strcmp(people[i].id, newPerson.id) == 0) {
+            printf("ID已存在，无法添加重复的用户。\n");
+            return;
+        }
+    }
+
+    printf("请输入密码：");
+    fgets(newPerson.password, sizeof(newPerson.password), stdin);
+    newPerson.password[strcspn(newPerson.password, "\n")] = 0; // 去除换行符
+    newPerson.reputation = (newPerson.reputation != 20) ? 20 : newPerson.reputation; // 如果信誉分超过20分，则将其设置为20分
+    newPerson.borrowedCount = 0; // 初始化借书数为0
+    // 使用更简洁的方法初始化预约信息
+    for (int i = 0; i < 1; i++) {
+        newPerson.reservedBooks[i].isbn[0] = '\0'; // 将isbn字段设置为空字符串
+    }
+    people[*personCount] = newPerson;
+    (*personCount)++;
+    people[*personCount].borrowedCount = 0;
+    savePeople(people, *personCount);
+    printf("人员添加成功！\n");
+}
+// 显示所有人员函数实现
+void displayPeople(const Person people[], int personCount) {
+    if (personCount == 0) {
+        printf("图书馆目前没有人员。\n");
+        return;
+    }
+    printf("图书馆人员列表：\n");
+    for (int i = 0; i < personCount; i++) {
+        printf("姓名：%s\n", people[i].name);
+        printf("ID：%s\n", people[i].id);
+        printf("信誉分：%d\n", people[i].reputation);
+        printf("预约情况：\n");
+        for (int j = 0; j < 1; j++) { // 假设每个人员最多只能预约一本书
+            if (people[i].reservedBooks[j].isbn[0] != '\0') { // 检查isbn字段是否不为空
+                printf("预约的书籍：%s\n", people[i].reservedBooks[j].isbn);
+            } else {
+                printf("未预约任何书籍。\n");
+            }
+        }
+        printf("--------------------\n");
+    }
+}
+//搜索人员 
+void searchPerson(const Person people[], int personCount) {
+    char searchID[20];
+    printf("请输入要搜索的ID：");
+    fgets(searchID, sizeof(searchID), stdin);
+    searchID[strcspn(searchID, "\n")] = 0; // 去除换行符
+
+    for (int i = 0; i < personCount; i++) {
+        if (strcmp(people[i].id, searchID) == 0) {
+            printf("姓名：%s\n", people[i].name);
+            printf("ID：%s\n", people[i].id);
+            if(people[i].borrowedCount == 0){
+    		printf("借阅的书籍：无\n");
+   			} else {
+    		for (int j = 0; j < people[i].borrowedCount; j++) {
+        		printf("借阅的书籍%d：%s\n", j + 1, people[i].borrowedBooks[j].title);
+        		// 假设borrowTime和returnTime是整数类型的变量
+        		time_t borrowTimeStamp = (time_t) people[i].borrowTime[j];
+        		time_t returnTimeStamp = (time_t) people[i].returnTime[j];
+        		printf("借书时间：%s\n", ctime(&borrowTimeStamp));
+        		printf("应还书时间：%s\n", ctime(&returnTimeStamp));
+    		}
+   		 }
+            return;
+        }
+    }
+    printf("没有找到ID为%s的人员。\n", searchID);
+}
+
+// 删除人员函数实现
+void deletePerson(Person people[], int *personCount) {
+    char searchID[20];
+    char inputPassword[20];
+
+    printf("请输入要删除的ID：");
+    fgets(searchID, sizeof(searchID), stdin);
+    searchID[strcspn(searchID, "\n")] = 0; // 去除换行符
+
+    printf("请输入密码：");
+    fgets(inputPassword, sizeof(inputPassword), stdin);
+    inputPassword[strcspn(inputPassword, "\n")] = 0; // 去除换行符
+
+    for (int i = 0; i < *personCount; i++) {
+        if (strcmp(people[i].id, searchID) == 0) {
+            if (strcmp(people[i].password, inputPassword) == 0) {
+                for (int j = i; j < *personCount - 1; j++) {
+                    people[j] = people[j + 1];
+                }
+                (*personCount)--;
+                savePeople(people, *personCount);
+                printf("人员删除成功！\n");
+                return;
+            } else {
+                printf("密码错误，无法删除人员。\n");
+                return;
+            }
+        }
+    }
+    printf("没有找到ID为%s的人员。\n", searchID);
+}
+
+
+void savePeople(Person people[], int count) {
+    FILE *file = fopen("people.dat", "wb");
+    if (file == NULL) {
+        printf("无法打开人员文件进行写入。\n");
+        return;
+    }
+    for (int i = 0; i < count; i++) {
+        fwrite(&people[i], sizeof(Person), 1, file);
+    }
+    fclose(file);
+}
+void loadPeople(Person people[], int *count) {
+    *count = 0;
+    FILE *file = fopen("people.dat", "rb");
+    if (file == NULL) {
+        printf("无法打开人员文件进行读取。\n");
+        return;
+    }
+    while (fread(&people[*count], sizeof(Person), 1, file) == 1) {
+        (*count)++;
+        // 检查加载的数据是否超过了borrowedBooks数组的大小
+        if (people[*count].borrowedCount > 3) {
+            printf("加载的人员信息不正确，borrowedCount超过3。\n");
+            return;
+        }
+    }
+    fclose(file);
+}
